@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FollowController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PhotoController;
@@ -24,9 +25,9 @@ Route::get('/', function () {
 
 //login 
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::get('/login', fn() => redirect()->route('landing'))->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::get('/register', fn() => redirect()->route('landing'))->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
 //verifikasi email
@@ -72,6 +73,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //Foto Download
     Route::get('/photos/{photo}/download', [PhotoController::class, 'download'])->name('photos.download');
 
+    Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');
+
 });
 
 // Admin routes
@@ -84,4 +87,6 @@ Route::middleware(['auth', 'verified', 'is_admin'])
         Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     });
 
+//Route Sharelink
 
+Route::get('/photo/{photo}', [PhotoController::class, 'show'])->name('photos.show');

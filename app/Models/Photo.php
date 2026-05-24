@@ -15,6 +15,7 @@ class Photo extends Model
         'caption',
         'description',
         'status',
+        'views',
     ];
 
     public function user()

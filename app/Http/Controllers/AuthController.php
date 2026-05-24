@@ -9,39 +9,58 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Register
+    // ===== REGISTER =====
 
     public function showRegister()
     {
         return view('auth.register');
-
     }
 
     public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-
+            'email' => 'required|email',
+            // ↑ Hapus unique:users dari sini
+            // Kita handle sendiri di bawah agar lebih fleksibel
             'password' => 'required|min:6|confirmed',
-
         ]);
 
+        // Cek apakah email sudah terdaftar
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            if ($existingUser->hasVerifiedEmail()) {
+                // Email sudah terdaftar DAN sudah diverifikasi
+                // → Tolak registrasi, suruh login
+                return redirect()->route('landing')->withErrors([
+                    'email' => 'Email ini sudah terdaftar. Silahkan login.'
+                ])->withInput($request->only('name', 'email'));
+            } else {
+                // Email sudah terdaftar TAPI belum diverifikasi
+                // → Hapus akun lama, buat akun baru dengan data terbaru
+                $existingUser->delete();
+                // ↑ Hapus akun lama yang belum terverifikasi
+                // Anggap akun itu tidak valid karena tidak pernah dikonfirmasi
+            }
+        }
+
+        // Buat akun baru
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-
         ]);
 
         Auth::login($user);
         $request->session()->regenerate();
         $user->sendEmailVerificationNotification();
+
         return redirect()->route('verification.notice')
             ->with('success', 'Registrasi berhasil! Silahkan cek email untuk verifikasi.');
     }
 
-    // Login
+    // ===== LOGIN =====
 
     public function showLogin()
     {
@@ -61,15 +80,13 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
-            // Cek apakah email sudah diverifikasi
+            // Cek verifikasi email
             if (!auth()->user()->hasVerifiedEmail()) {
-                // Kirim ulang email verifikasi otomatis
-                auth()->user()->sendEmailVerificationNotification();
-                return redirect()->route('verification.notice')->with(
-                    'warning',
-                    'Email kamu belum diverifikasi. Kami sudah kirim ulang link verifikasi, cek email kamu.'
-                );
 
+
+
+                return redirect()->route('verification.notice')
+                    ->with('warning', 'Email kamu belum diverifikasi. Cek inbox kamu.');
             }
 
             // Update waktu login terakhir
@@ -83,22 +100,18 @@ class AuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return back()->withErrors([
+        return redirect()->route('landing')->withErrors([
             'email' => 'Email atau password salah.',
         ])->withInput($request->only('email'));
     }
-    // logout
+
+    // ===== LOGOUT =====
 
     public function logout(Request $request)
     {
         Auth::logout();
-        // ↑ Hapus session login user
-
         $request->session()->invalidate();
-        // ↑ Hancurkan seluruh session yang ada
-
         $request->session()->regenerateToken();
-        // ↑ Buat CSRF token baru untuk keamanan
 
         return redirect()->route('landing');
     }
