@@ -63,6 +63,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/saved', [SaveController::class, 'index'])->name('saved');
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::get('/profile/password', [ProfileController::class, 'changePasswordPage'])->name('profile.password.page');
     Route::post('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
     Route::get('/search', [SearchController::class, 'index'])->name('search');
     Route::post('/users/{user}/follow', [FollowController::class, 'toggle'])->name('users.follow');

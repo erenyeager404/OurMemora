@@ -12,7 +12,7 @@
 
 <body class="bg-gray-950 text-white min-h-screen flex">
 
-    //background
+    {{-- Background --}}
     <div class="dashboard-bg" id="dashBg">
         @if(isset($bgPhoto) && $bgPhoto->files->isNotEmpty())
             <img src="{{ $bgPhoto->files->first()->url }}" alt="" id="bgImg">
@@ -22,10 +22,10 @@
         <div class="dashboard-bg-overlay"></div>
     </div>
 
-    //sidebar
+    {{-- ── SIDEBAR (icon only, expand on hover) ── --}}
     <aside class="sidebar" id="sidebar">
 
-        //logo
+        {{-- Logo --}}
         <div class="sidebar-logo-area">
             <a href="{{ route('dashboard') }}" class="relative w-full flex items-center justify-center">
                 <span class="sidebar-logo-short">M</span>
@@ -77,7 +77,7 @@
         </div>
     </aside>
 
-    //main konten
+    {{-- Main --}}
     <main class="main-content relative z-10">
         @if(session('success'))
             <div class="flash-success mb-6">✓ {{ session('success') }}</div>

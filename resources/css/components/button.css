@@ -1,0 +1,35 @@
+/* Base styles shared by all button variants */
+.btn,
+.btn-primary,
+.btn-ghost,
+.btn-danger,
+.btn-submit,
+.btn-icon,
+.btn-google {
+    @apply inline-flex items-center justify-center gap-2 font-medium transition-all duration-150 cursor-pointer select-none;
+    border-radius: var(--radius-btn);
+}
+
+.btn-primary {
+    @apply px-4 py-2 text-sm text-white bg-violet-600 hover:bg-violet-700 active:scale-95;
+}
+
+.btn-ghost {
+    @apply px-4 py-2 text-sm text-gray-300 hover:text-white border border-white/10 hover:border-white/25 hover:bg-white/5;
+}
+
+.btn-danger {
+    @apply px-3 py-1.5 text-xs text-red-400 bg-red-900/30 hover:bg-red-900/60;
+}
+
+.btn-submit {
+    @apply w-full py-2.5 text-sm text-white bg-violet-600 hover:bg-violet-700 active:scale-95;
+}
+
+.btn-icon {
+    @apply w-9 h-9 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl;
+}
+
+.btn-google {
+    @apply w-full py-2.5 text-sm text-gray-300 bg-gray-800 hover:bg-gray-700 border border-gray-700;
+}

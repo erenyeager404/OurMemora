@@ -1,0 +1,26 @@
+.card {
+    @apply bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl;
+}
+
+.card-solid {
+    @apply bg-gray-900 border border-gray-800 rounded-2xl;
+}
+
+/* card-photo: manually expand .card properties */
+.card-photo {
+    @apply bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl break-inside-avoid overflow-hidden hover:bg-white/15 transition-colors duration-200;
+}
+
+.card-photo-landing {
+    @apply break-inside-avoid rounded-2xl overflow-hidden bg-gray-900 border border-gray-800/50;
+}
+
+/* card-stat: manually expand .card-solid properties */
+.card-stat {
+    @apply bg-gray-900 border border-gray-800 rounded-2xl p-5;
+}
+
+/* card-info: manually expand .card properties */
+.card-info {
+    @apply bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-6;
+}

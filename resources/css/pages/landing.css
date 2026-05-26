@@ -1,0 +1,40 @@
+.landing-nav {
+    @apply fixed top-0 w-full z-40 bg-gray-950/80 backdrop-blur-xl border-b border-white/5;
+}
+
+.hero-section {
+    @apply pt-28 pb-14 px-6 text-center relative overflow-hidden;
+}
+
+.hero-blob {
+    @apply absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full pointer-events-none;
+    background: radial-gradient(ellipse, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+}
+
+.hero-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 mb-6 bg-violet-950/60 border border-violet-800/40 rounded-full text-xs text-violet-300;
+}
+
+.hero-title {
+    @apply text-5xl md:text-6xl font-bold mb-5 leading-[1.15];
+}
+
+.hero-subtitle {
+    @apply text-gray-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed;
+}
+
+.hero-cta-group {
+    @apply flex items-center justify-center gap-4 flex-wrap;
+}
+
+.guest-info-bar {
+    @apply flex items-center justify-center gap-2 mb-8 text-xs text-gray-600;
+}
+
+.gallery-grid {
+    @apply columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4;
+}
+
+.photo-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4;
+}

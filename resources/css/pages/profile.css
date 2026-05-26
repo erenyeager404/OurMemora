@@ -1,0 +1,76 @@
+/* profile-header: manually expand .card properties */
+.profile-header {
+    @apply bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-6 mb-6;
+}
+
+.profile-avatar-wrap {
+    @apply relative w-20 h-20;
+}
+
+.profile-avatar {
+    @apply w-20 h-20 rounded-full object-cover ring-2 ring-violet-500/40;
+}
+
+.profile-avatar-edit {
+    @apply absolute bottom-0 right-0 w-7 h-7 bg-violet-600 hover:bg-violet-700 rounded-full flex items-center justify-center text-xs cursor-pointer transition-colors;
+}
+
+.profile-stats {
+    @apply flex gap-6;
+}
+
+.profile-stat {
+    @apply text-center cursor-pointer;
+}
+
+.profile-stat-num {
+    @apply text-xl font-bold block;
+}
+
+.profile-stat-label {
+    @apply text-gray-500 text-xs;
+}
+
+/* Photo grid di profile */
+.profile-photo-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3;
+}
+
+.profile-photo-item {
+    @apply relative rounded-xl overflow-hidden aspect-square cursor-pointer;
+}
+
+.profile-photo-img {
+    @apply w-full h-full object-cover group-hover:scale-105 transition-transform duration-300;
+}
+
+.profile-photo-overlay {
+    @apply absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end justify-between p-3;
+}
+
+.profile-photo-status {
+    @apply absolute top-2 left-2;
+}
+
+/* Sort bar */
+.sort-bar {
+    @apply flex items-center gap-2 mb-6 flex-wrap;
+}
+
+.sort-btn {
+    @apply px-3 py-1.5 text-xs rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-colors;
+}
+
+.sort-btn.active {
+    @apply bg-violet-600/30 border-violet-600/50 text-violet-300;
+}
+
+/* Change password — separate page style */
+.change-password-page {
+    @apply max-w-md mx-auto;
+}
+
+/* change-password-card: manually expand .card properties */
+.change-password-card {
+    @apply bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-8;
+}

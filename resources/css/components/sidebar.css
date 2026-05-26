@@ -1,0 +1,79 @@
+/* ── Collapsed sidebar (icon only) ── */
+.sidebar {
+    @apply fixed left-0 top-0 h-full z-20 bg-gray-900/90 backdrop-blur-xl border-r border-white/8 flex flex-col transition-all duration-300;
+    width: var(--sidebar-w);
+}
+
+/* ── Expanded on hover ── */
+.sidebar:hover {
+    width: var(--sidebar-w-open);
+}
+
+.sidebar:hover .nav-label {
+    @apply opacity-100 translate-x-0;
+}
+
+.sidebar:hover .sidebar-logo-full {
+    @apply opacity-100;
+}
+
+.sidebar:hover .sidebar-logo-short {
+    @apply opacity-0;
+}
+
+/* ── Logo area ── */
+.sidebar-logo-area {
+    @apply flex items-center justify-center h-16 border-b border-white/8 overflow-hidden px-4;
+}
+
+.sidebar-logo-short {
+    @apply text-violet-400 font-bold text-xl transition-opacity duration-200;
+}
+
+.sidebar-logo-full {
+    @apply absolute text-white font-bold text-lg transition-opacity duration-200 opacity-0 whitespace-nowrap;
+}
+
+/* ── Nav items ── */
+.nav-item {
+    @apply relative flex items-center h-11 text-gray-400 hover:text-white hover:bg-white/8 transition-all duration-200 cursor-pointer rounded-xl mx-2 px-3;
+}
+
+.nav-item.active {
+    @apply bg-violet-600/80 text-white;
+}
+
+.nav-item-icon {
+    @apply text-lg flex-shrink-0 w-6 text-center;
+}
+
+.nav-label {
+    @apply text-sm font-medium ml-3 whitespace-nowrap opacity-0 -translate-x-2 transition-all duration-200;
+}
+
+/* Tooltip saat tidak hover sidebar */
+.sidebar:not(:hover) .nav-item:hover::after {
+    content: attr(data-tooltip);
+    @apply absolute left-full ml-3 px-3 py-1.5 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap border border-gray-700 z-50 pointer-events-none;
+}
+
+/* ── Upload button ── */
+.nav-upload {
+    @apply relative flex items-center h-11 text-white bg-violet-600/70 hover:bg-violet-600 transition-all duration-200 cursor-pointer rounded-xl mx-2 px-3;
+}
+
+/* ── Admin sidebar ── */
+.sidebar-admin {
+    @apply fixed left-0 top-0 h-full z-20 bg-gray-900/90 backdrop-blur-xl flex flex-col transition-all duration-300 border-r border-red-900/20;
+}
+
+.nav-item-admin.active {
+    @apply bg-red-600/80 text-white;
+}
+
+/* ── Main content offset ── */
+.main-content {
+    @apply flex-1 min-h-screen transition-all duration-300;
+    margin-left: var(--sidebar-w);
+    padding: 2rem;
+}

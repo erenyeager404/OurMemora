@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'MyGallery')</title>
+    <title>@yield('title', 'OurGallery')</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
@@ -42,8 +42,8 @@
     {{-- Flash --}}
     @if(session('success'))
         <div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-3
-                    bg-green-900/80 backdrop-blur-sm border border-green-700/50
-                    text-green-300 rounded-xl text-sm shadow-xl whitespace-nowrap">
+                        bg-green-900/80 backdrop-blur-sm border border-green-700/50
+                        text-green-300 rounded-xl text-sm shadow-xl whitespace-nowrap">
             &#10003; {{ session('success') }}
         </div>
     @endif
@@ -134,13 +134,13 @@
         }
 
         @if($errors->any())
-                document.addEventListener('DOMContentLoaded', () => {
-                    @if($errors->has('name'))
-                        openAuthModal('register');
-                    @else
-                        openAuthModal('login');
-                    @endif
-            });
+            document.addEventListener('DOMContentLoaded', () => {
+                @if($errors->has('name'))
+                    openAuthModal('register');
+                @else
+                    openAuthModal('login');
+                @endif
+                });
         @endif
     </script>
 

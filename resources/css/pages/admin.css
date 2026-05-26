@@ -1,0 +1,39 @@
+.admin-stats-grid {
+    @apply grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8;
+}
+
+.admin-stat-card {
+    @apply bg-gray-800 border border-gray-700/50 rounded-2xl p-5;
+}
+
+.admin-stat-num {
+    @apply text-3xl font-bold mt-1 mb-1;
+}
+
+.admin-stat-label {
+    @apply text-gray-500 text-xs;
+}
+
+.admin-progress {
+    @apply mt-3 h-1.5 bg-gray-700 rounded-full overflow-hidden;
+}
+
+.admin-progress-bar {
+    @apply h-full rounded-full transition-all duration-500;
+}
+
+.admin-photo-card {
+    @apply break-inside-avoid bg-gray-800 rounded-2xl overflow-hidden border border-gray-700/50;
+}
+
+.admin-delete-btn {
+    @apply flex items-center gap-1.5 px-3 py-1.5 bg-red-900/40 hover:bg-red-900/70 text-red-400 text-xs rounded-lg transition-colors;
+}
+
+.top-photo-card {
+    @apply bg-gray-800 border border-gray-700/50 rounded-2xl p-6;
+}
+
+.engagement-header {
+    @apply flex items-center justify-between mb-8;
+}

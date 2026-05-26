@@ -1,0 +1,122 @@
+.dashboard-bg {
+    @apply fixed inset-0 z-0;
+}
+
+.dashboard-bg img {
+    @apply w-full h-full object-cover;
+}
+
+.dashboard-bg-overlay {
+    @apply absolute inset-0 bg-black/70 backdrop-blur-sm;
+}
+
+.dashboard-grid {
+    @apply columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4;
+}
+
+.action-bar {
+    @apply flex items-center gap-3 pt-3 border-t border-white/10;
+}
+
+.action-btn {
+    @apply flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors;
+}
+
+.action-btn-like {
+    @apply flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-400 transition-colors;
+}
+
+.action-btn-like.liked {
+    @apply text-red-400;
+}
+
+.action-btn-save {
+    @apply flex items-center gap-1.5 text-xs text-gray-400 hover:text-violet-400 transition-colors;
+}
+
+.action-btn-save.saved {
+    @apply text-violet-400;
+}
+
+.action-btn-comment {
+    @apply flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-400 transition-colors;
+}
+
+.view-count {
+    @apply flex items-center gap-1 text-xs text-gray-600 ml-auto;
+}
+
+.comment-box {
+    @apply mt-3 space-y-1.5;
+}
+
+.comment-item {
+    @apply text-xs leading-relaxed;
+}
+
+.comment-name {
+    @apply text-violet-300 font-medium;
+}
+
+.comment-input-wrap {
+    @apply flex gap-2 mt-2;
+}
+
+.comment-input {
+    @apply flex-1 px-3 py-2 bg-white/8 border border-white/15 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors;
+}
+
+/* Slider */
+.photo-slider-wrap {
+    @apply relative overflow-hidden;
+}
+
+.photo-slider-track {
+    @apply flex transition-transform duration-300 ease-out;
+}
+
+.slider-btn {
+    @apply absolute top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/80 text-white rounded-full flex items-center justify-center text-sm transition-colors z-10;
+}
+
+.slider-btn-prev {
+    @apply left-2;
+}
+
+.slider-btn-next {
+    @apply right-2;
+}
+
+.slider-dots {
+    @apply absolute bottom-2.5 left-0 right-0 flex justify-center gap-1.5 z-10;
+}
+
+.slider-dot {
+    @apply w-1.5 h-1.5 rounded-full bg-white/50 transition-all;
+}
+
+.slider-dot.active {
+    @apply bg-white w-3;
+}
+
+/* Dropdown more menu */
+.dropdown-menu {
+    @apply absolute right-0 bottom-full mb-2 w-40 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 z-50 overflow-hidden hidden;
+}
+
+.dropdown-item {
+    @apply flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:bg-gray-700 transition-colors w-full text-left;
+}
+
+/* Photo detail modal/page background */
+.photo-detail-bg {
+    @apply fixed inset-0 z-0 transition-all duration-500;
+}
+
+.photo-detail-bg img {
+    @apply w-full h-full object-cover;
+}
+
+.photo-detail-overlay {
+    @apply absolute inset-0 bg-black/75 backdrop-blur-xl;
+}

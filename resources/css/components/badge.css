@@ -1,0 +1,37 @@
+/* Base styles shared by all badge variants */
+.badge,
+.badge-violet,
+.badge-gray,
+.badge-green,
+.badge-red,
+.admin-badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full;
+}
+
+.badge-violet {
+    @apply bg-violet-900/50 text-violet-300 border border-violet-800/50;
+}
+
+.badge-gray {
+    @apply bg-gray-800 text-gray-400 border border-gray-700;
+}
+
+.badge-green {
+    @apply bg-green-900/50 text-green-400 border border-green-800/50;
+}
+
+.badge-red {
+    @apply bg-red-900/50 text-red-400 border border-red-800/50;
+}
+
+.tag-chip {
+    @apply px-2.5 py-0.5 bg-gray-800/80 text-gray-500 text-xs rounded-full hover:text-violet-400 hover:bg-gray-800 transition-colors cursor-pointer;
+}
+
+.tag-chip-active {
+    @apply px-2.5 py-0.5 bg-violet-900/40 text-violet-300 text-xs rounded-full border border-violet-800/40;
+}
+
+.admin-badge {
+    @apply bg-red-900/50 text-red-400 border border-red-800/50;
+}

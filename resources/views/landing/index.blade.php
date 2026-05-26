@@ -44,7 +44,7 @@
         <div class="gallery-grid">
             @forelse($photos as $photo)
                 @if($photo->files->isNotEmpty())
-                    <div class="card-photo-landing">
+                    <div class="card-photo-landing group">
                         <a href="{{ route('photos.show', $photo) }}" class="block overflow-hidden">
                             <img src="{{ $photo->files->first()->url }}" alt="{{ $photo->caption }}"
                                 class="w-full object-cover transition-transform duration-500 group-hover:scale-105">

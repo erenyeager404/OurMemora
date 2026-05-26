@@ -36,16 +36,13 @@ class PhotoController extends Controller
     }
 
     // Detail foto
-    public function show(Photo $photo)
+    public function show(Photo $photo, Request $request)
     {
-        // Cek akses foto private
         if ($photo->status === 'private') {
-            if (!auth()->check() || auth()->id() !== $photo->user_id) {
+            if (!auth()->check() || auth()->id() !== $photo->user_id)
                 abort(403);
-            }
         }
 
-        // View count — pakai session agar tidak naik saat refresh
         $key = 'viewed_photo_' . $photo->id;
         if (!session()->has($key)) {
             $photo->increment('views');
@@ -53,6 +50,12 @@ class PhotoController extends Controller
         }
 
         $photo->load(['user', 'files', 'likes', 'saves', 'comments.user', 'tags']);
+
+        // Jika dipanggil sebagai partial (dari modal dashboard)
+        if ($request->boolean('partial')) {
+            return view('photos.show', compact('photo'));
+            // Hanya return konten, tanpa layout
+        }
 
         return view('photos.show', compact('photo'));
     }

@@ -1,283 +1,246 @@
+@if(!request('partial'))
 @extends(auth()->check() ? 'layouts.app' : 'layouts.guest')
 @section('title', $photo->caption)
-
 @section('content')
-    <div class="max-w-5xl mx-auto {{ auth()->check() ? '' : 'pt-28 px-6 pb-20' }}">
+@endif
 
+@php
+    $albumPhotos = $photo->album_id
+        ? \App\Models\Photo::where('album_id', $photo->album_id)->with('files')->orderBy('id')->get()
+        : collect([$photo]);
+    $total = $albumPhotos->count();
+@endphp
+
+<div class="photo-detail-wrap {{ request('partial') ? '' : 'pt-6' }}">
+
+    @if(!request('partial'))
         <a href="{{ url()->previous() }}"
             class="inline-flex items-center gap-2 text-gray-400 hover:text-white text-sm mb-6 transition-colors">
-            &#8592; Kembali
+            ← Kembali
         </a>
+    @else
+        <div class="flex justify-end p-4 pb-0">
+            <button onclick="closePhotoDetail()" class="modal-close">✕</button>
+        </div>
+    @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="photo-detail-grid p-4 pt-0">
 
-            {{-- Foto / Slider --}}
-            <div>
-                @php
-                    $albumPhotos = $photo->album_id
-                        ? \App\Models\Photo::where('album_id', $photo->album_id)->orderBy('id')->get()
-                        : collect([$photo]);
-                    $totalSlides = $albumPhotos->count();
-                @endphp
-
-                <div class="rounded-2xl overflow-hidden border border-white/10 relative">
-                    <div class="flex transition-transform duration-300" id="detailSlider"
-                        style="width: {{ $totalSlides * 100 }}%">
-                        @foreach($albumPhotos as $ap)
-                            @foreach($ap->files as $file)
-                                <div style="width: {{ 100 / $totalSlides }}%">
-                                    <img src="{{ $file->url }}" alt="{{ $ap->caption }}" class="w-full object-cover">
-                                </div>
-                            @endforeach
+        {{-- Foto + Slider --}}
+        <div>
+            <div class="photo-main-img">
+                <div class="flex transition-transform duration-300" id="detailSlider"
+                    style="width: {{ $total * 100 }}%">
+                    @foreach($albumPhotos as $ap)
+                        @foreach($ap->files as $file)
+                            <div style="width: {{ 100 / $total }}%">
+                                <img src="{{ $file->url }}" alt="{{ $ap->caption }}" class="w-full object-cover"
+                                    onload="{{ request('partial') ? 'updateModalBg(this.src)' : '' }}">
+                            </div>
                         @endforeach
-                    </div>
-
-                    @if($totalSlides > 1)
-                        <button onclick="detailSlide(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9
-                                           bg-black/60 hover:bg-black/80 text-white rounded-full
-                                           flex items-center justify-center transition-colors">
-                            &#8592;
-                        </button>
-                        <button onclick="detailSlide(1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9
-                                           bg-black/60 hover:bg-black/80 text-white rounded-full
-                                           flex items-center justify-center transition-colors">
-                            &#8594;
-                        </button>
-                        <div class="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-                            @for($i = 0; $i < $totalSlides; $i++)
-                                <div
-                                    class="detail-dot w-2 h-2 rounded-full {{ $i === 0 ? 'bg-white' : 'bg-white/40' }} transition-colors">
-                                </div>
-                            @endfor
-                        </div>
-                    @endif
+                    @endforeach
                 </div>
-
-                {{-- Thumbnail strip --}}
-                @if($totalSlides > 1)
-                    <div class="flex gap-2 mt-3 overflow-x-auto pb-2">
-                        @foreach($albumPhotos as $i => $ap)
-                            <button onclick="detailGoTo({{ $i }})" id="thumb-{{ $i }}"
-                                class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors {{ $i === 0 ? 'border-violet-500' : 'border-transparent' }}">
-                                <img src="{{ $ap->files->first()->url }}" class="w-full h-full object-cover">
-                            </button>
-                        @endforeach
+                @if($total > 1)
+                    <button onclick="dSlide(-1)" class="slider-btn slider-btn-prev">‹</button>
+                    <button onclick="dSlide(1)" class="slider-btn slider-btn-next">›</button>
+                    <div class="slider-dots">
+                        @for($i = 0; $i < $total; $i++)
+                            <div class="slider-dot {{ $i === 0 ? 'active' : '' }}" id="ddot-{{ $i }}"></div>
+                        @endfor
                     </div>
                 @endif
             </div>
 
-            {{-- Info --}}
-            <div class="flex flex-col">
-
-                {{-- User --}}
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <img src="{{ $photo->user->avatar_url }}" alt="{{ $photo->user->name }}"
-                            class="w-10 h-10 rounded-full object-cover">
-                        <div>
-                            <p class="font-semibold text-sm">{{ $photo->user->name }}</p>
-                            <p class="text-xs text-gray-500">{{ $photo->created_at->diffForHumans() }}</p>
-                        </div>
-                    </div>
-                    @auth
-                        @if(auth()->id() !== $photo->user_id)
-                                <button onclick="toggleFollow({{ $photo->user_id }}, this)" class="px-4 py-1.5 text-xs rounded-full font-medium transition-colors
-                                                       {{ auth()->user()->isFollowing($photo->user_id)
-                            ? 'bg-gray-700 text-gray-300 hover:bg-red-900/30 hover:text-red-400'
-                            : 'bg-violet-600 hover:bg-violet-700 text-white' }}">
-                                    {{ auth()->user()->isFollowing($photo->user_id) ? '&#10003; Mengikuti' : '&#43; Ikuti' }}
-                                </button>
-                        @endif
-                    @endauth
-                </div>
-
-                <h1 class="text-xl font-bold mb-2">{{ $photo->caption }}</h1>
-
-                @if($photo->description)
-                    <p class="text-gray-400 text-sm mb-4 leading-relaxed">{{ $photo->description }}</p>
-                @endif
-
-                @if($photo->tags->isNotEmpty())
-                    <div class="flex flex-wrap gap-1 mb-4">
-                        @foreach($photo->tags as $tag)
-                            <a href="{{ route('search') }}?q={{ $tag->name }}"
-                                class="px-2 py-0.5 bg-gray-800 text-gray-400 text-xs rounded-full hover:text-violet-400 transition-colors">
-                                #{{ $tag->name }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
-
-                {{-- Stats --}}
-                <div class="flex items-center gap-5 py-4 border-y border-gray-800 mb-4">
-                    @auth
-                        <button onclick="toggleLikeDetail({{ $photo->id }}, this)"
-                            class="flex items-center gap-2 transition-colors
-                                           {{ $photo->isLikedBy(auth()->id()) ? 'text-red-400' : 'text-gray-400 hover:text-red-400' }}">
-                            <span>{{ $photo->isLikedBy(auth()->id()) ? '&#10084;' : '&#9825;' }}</span>
-                            <span id="detail-like-count">{{ $photo->likes->count() }}</span>
+            {{-- Thumbnails --}}
+            @if($total > 1)
+                <div class="thumbnail-strip mt-3">
+                    @foreach($albumPhotos as $i => $ap)
+                        <button onclick="dGoTo({{ $i }})" id="dthumb-{{ $i }}" class="thumbnail-item {{ $i === 0 ? 'active' : '' }}">
+                            <img src="{{ $ap->files->first()->url }}" class="w-full h-full object-cover">
                         </button>
-                    @else
-                        <button onclick="openAuthModal('login','like')"
-                            class="flex items-center gap-2 text-gray-400 hover:text-red-400 transition-colors">
-                            <span>&#9825;</span>
-                            {{ $photo->likes->count() }}
-                        </button>
-                    @endauth
-
-                    <span class="flex items-center gap-2 text-gray-400">
-                        <span>&#128172;</span>
-                        <span id="detail-comment-count">{{ $photo->comments->count() }}</span>
-                    </span>
-
-                    <span class="flex items-center gap-2 text-gray-500 text-sm ml-auto">
-                        &#128065; {{ number_format($photo->views) }}
-                    </span>
+                    @endforeach
                 </div>
+            @endif
+        </div>
 
-                {{-- Tombol aksi --}}
-                <div class="flex gap-2 mb-4">
-                    <a href="{{ route('photos.download', $photo) }}" class="flex-1 flex items-center justify-center gap-2 py-2.5
-                              bg-gray-800 hover:bg-gray-700 border border-gray-700
-                              rounded-xl text-sm text-gray-300 transition-colors">
-                        &#8681; Download
-                    </a>
-                    <button onclick="copyDetailLink()" class="flex-1 flex items-center justify-center gap-2 py-2.5
-                                   bg-gray-800 hover:bg-gray-700 border border-gray-700
-                                   rounded-xl text-sm text-gray-300 transition-colors">
-                        &#128279; <span id="copyBtnText">Salin Link</span>
-                    </button>
-                    <a href="https://wa.me/?text={{ urlencode($photo->caption . ' ' . route('photos.show', $photo)) }}"
-                        target="_blank" class="flex items-center justify-center gap-2 px-4 py-2.5
-                              bg-green-800 hover:bg-green-700 rounded-xl text-sm text-white transition-colors">
-                        &#128242; WA
-                    </a>
+        {{-- Info panel --}}
+        <div class="photo-info-panel">
+
+            {{-- Uploader --}}
+            <div class="uploader-row">
+                <div class="flex items-center gap-3">
+                    <img src="{{ $photo->user->avatar_url }}" class="uploader-avatar">
+                    <div>
+                        <p class="font-semibold text-sm">{{ $photo->user->name }}</p>
+                        <p class="text-xs text-gray-500">{{ $photo->created_at->diffForHumans() }}</p>
+                    </div>
                 </div>
-
-                {{-- Komentar --}}
-                <div class="flex-1 overflow-y-auto max-h-56 space-y-3 mb-4" id="detail-comments">
-                    @forelse($photo->comments as $comment)
-                        <div class="flex gap-2 text-sm">
-                            <img src="{{ $comment->user->avatar_url }}" alt="{{ $comment->user->name }}"
-                                class="w-7 h-7 rounded-full flex-shrink-0 object-cover">
-                            <div>
-                                <span class="text-violet-400 font-medium text-xs">{{ $comment->user->name }}</span>
-                                <span class="text-gray-300 text-xs ml-1">{{ $comment->body }}</span>
-                                <p class="text-gray-600 text-xs mt-0.5">{{ $comment->created_at->diffForHumans() }}</p>
-                            </div>
-                        </div>
-                    @empty
-                        <p class="text-gray-600 text-xs text-center py-4">Belum ada komentar</p>
-                    @endforelse
-                </div>
-
-                {{-- Input komentar --}}
                 @auth
-                    <div class="flex gap-2">
-                        <input type="text" id="detail-comment-input" placeholder="Tulis komentar..."
-                            class="flex-1 px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl
-                                          text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors">
-                        <button onclick="submitDetailComment({{ $photo->id }})"
-                            class="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 rounded-xl text-sm transition-colors">
-                            Kirim
+                    @if(auth()->id() !== $photo->user_id)
+                        <button onclick="toggleFollow({{ $photo->user_id }}, this)"
+                            class="{{ auth()->user()->isFollowing($photo->user_id) ? 'btn-ghost text-xs' : 'btn-primary text-xs' }}">
+                            {{ auth()->user()->isFollowing($photo->user_id) ? '✓ Mengikuti' : '+ Ikuti' }}
                         </button>
-                    </div>
+                    @endif
+                @endauth
+            </div>
+
+            <h1 class="photo-caption">{{ $photo->caption }}</h1>
+            @if($photo->description)
+                <p class="photo-desc">{{ $photo->description }}</p>
+            @endif
+
+            {{-- Tags --}}
+            @if($photo->tags->isNotEmpty())
+                <div class="flex flex-wrap gap-1 mb-4">
+                    @foreach($photo->tags as $tag)
+                        <a href="{{ route('search') }}?q={{ $tag->name }}" class="tag-chip">
+                            #{{ $tag->name }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+
+            {{-- Stats --}}
+            <div class="photo-stats-row">
+                @auth
+                    <button onclick="dToggleLike({{ $photo->id }}, this)"
+                        class="stat-item-btn {{ $photo->isLikedBy(auth()->id()) ? 'text-red-400' : 'text-gray-400 hover:text-red-400' }}">
+                        <span>{{ $photo->isLikedBy(auth()->id()) ? '♥' : '♡' }}</span>
+                        <span id="dLikeCount">{{ $photo->likes->count() }}</span>
+                    </button>
                 @else
-                    <button onclick="openAuthModal('login','comment')" class="w-full py-2.5 bg-gray-800 hover:bg-gray-700 border border-gray-700
-                                       rounded-xl text-sm text-gray-400 transition-colors">
-                        &#128172; Login untuk berkomentar
+                    <button onclick="openAuthModal('login','like')" class="stat-item-btn text-gray-400 hover:text-red-400">
+                        <span>♡</span> {{ $photo->likes->count() }}
                     </button>
                 @endauth
 
+                <span class="stat-item-btn text-gray-400">
+                    ◯ <span id="dCommentCount">{{ $photo->comments->count() }}</span>
+                </span>
+
+                <span class="stat-item-btn text-gray-500 ml-auto">
+                    👁 {{ number_format($photo->views) }}
+                </span>
             </div>
+
+            {{-- Action buttons --}}
+            <div class="photo-actions-row">
+                <a href="{{ route('photos.download', $photo) }}" class="photo-action-btn">
+                    ⬇ Download
+                </a>
+                <button onclick="dCopyLink('{{ route('photos.show', $photo) }}')" class="photo-action-btn"
+                    id="dCopyBtn">
+                    🔗 Salin Link
+                </button>
+                <a href="https://wa.me/?text={{ urlencode($photo->caption . ' ' . route('photos.show', $photo)) }}"
+                    target="_blank" class="photo-action-btn">
+                    📱 WA
+                </a>
+            </div>
+
+            {{-- Komentar --}}
+            <div class="comments-list" id="dComments">
+                @forelse($photo->comments as $c)
+                    <div class="comment-detail-item">
+                        <img src="{{ $c->user->avatar_url }}" class="comment-detail-avatar">
+                        <div>
+                            <span class="text-violet-300 font-medium text-xs">{{ $c->user->name }}</span>
+                            <span class="text-gray-300 text-xs ml-1">{{ $c->body }}</span>
+                            <p class="text-gray-600 text-xs mt-0.5">{{ $c->created_at->diffForHumans() }}</p>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-center text-gray-600 text-xs py-6">Belum ada komentar</p>
+                @endforelse
+            </div>
+
+            {{-- Input komentar --}}
+            @auth
+                <div class="comment-detail-input-wrap">
+                    <input type="text" id="dCommentInput" placeholder="Tulis komentar..." class="form-input flex-1 py-2">
+                    <button onclick="dSubmitComment({{ $photo->id }})" class="btn-primary px-4">
+                        Kirim
+                    </button>
+                </div>
+            @else
+                <button onclick="openAuthModal('login','comment')" class="btn-ghost w-full mt-2 text-sm">
+                    ◯ Login untuk berkomentar
+                </button>
+            @endauth
+
         </div>
     </div>
+</div>
+
+<script>
+    const csrf2 = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    let dIdx = 0;
+    const dTotal = {{ $total }};
+
+    function dSlide(dir) {
+        dIdx = (dIdx + dir + dTotal) % dTotal;
+        dGoTo(dIdx);
+    }
+    function dGoTo(i) {
+        dIdx = i;
+        const s = document.getElementById('detailSlider');
+        if (s) s.style.transform = `translateX(-${i * (100 / dTotal)}%)`;
+        document.querySelectorAll('[id^="ddot-"]').forEach((d, j) => d.classList.toggle('active', j === i));
+        document.querySelectorAll('[id^="dthumb-"]').forEach((t, j) => t.classList.toggle('active', j === i));
+
+        // Update background foto saat slide
+        @if(request('partial'))
+            const imgs = document.querySelectorAll('#detailSlider img');
+            if (imgs[i]) updateModalBg(imgs[i].src);
+        @endif
+}
+
+    function updateModalBg(src) {
+        const bg = document.getElementById('modalBgImg');
+        if (bg) bg.src = src;
+    }
+
+    async function dToggleLike(id, btn) {
+        const res = await fetch(`/photos/${id}/like`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf2, 'Content-Type': 'application/json' } });
+        const data = await res.json();
+        btn.querySelector('span').innerHTML = data.liked ? '♥' : '♡';
+        document.getElementById('dLikeCount').textContent = data.total;
+        btn.classList.toggle('text-red-400', data.liked);
+        btn.classList.toggle('text-gray-400', !data.liked);
+    }
+
+    async function dSubmitComment(id) {
+        const input = document.getElementById('dCommentInput');
+        const body = input.value.trim(); if (!body) return;
+        const res = await fetch(`/photos/${id}/comment`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf2, 'Content-Type': 'application/json' }, body: JSON.stringify({ body }) });
+        const data = await res.json();
+        const list = document.getElementById('dComments');
+        const div = document.createElement('div'); div.className = 'comment-detail-item';
+        div.innerHTML = `<div class="w-7 h-7 rounded-full bg-violet-800 flex-shrink-0 flex items-center justify-center text-xs">${data.comment.user_name.charAt(0)}</div><div><span class="text-violet-300 font-medium text-xs">${data.comment.user_name}</span><span class="text-gray-300 text-xs ml-1">${data.comment.body}</span></div>`;
+        list.appendChild(div);
+        const cnt = document.getElementById('dCommentCount');
+        if (cnt) cnt.textContent = data.total;
+        input.value = '';
+        list.scrollTop = list.scrollHeight;
+    }
+
+    async function toggleFollow(id, btn) {
+        const res = await fetch(`/users/${id}/follow`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf2, 'Content-Type': 'application/json' } });
+        const data = await res.json();
+        if (data.is_following) { btn.textContent = '✓ Mengikuti'; btn.className = 'btn-ghost text-xs'; }
+        else { btn.textContent = '+ Ikuti'; btn.className = 'btn-primary text-xs'; }
+    }
+
+    function dCopyLink(url) {
+        navigator.clipboard.writeText(url).then(() => {
+            const btn = document.getElementById('dCopyBtn');
+            btn.textContent = '✓ Disalin!';
+            setTimeout(() => btn.textContent = '🔗 Salin Link', 2000);
+        });
+    }
+</script>
+
+@if(!request('partial'))
 @endsection
-
-@push('scripts')
-    <script>
-        const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
-        let detailIndex = 0;
-        const totalSlides = {{ $totalSlides }};
-
-        function detailSlide(dir) {
-            detailIndex = (detailIndex + dir + totalSlides) % totalSlides;
-            detailGoTo(detailIndex);
-        }
-        function detailGoTo(i) {
-            detailIndex = i;
-            const s = document.getElementById('detailSlider');
-            s.style.transform = `translateX(-${i * (100 / totalSlides)}%)`;
-            document.querySelectorAll('.detail-dot').forEach((d, j) => {
-                d.classList.toggle('bg-white', j === i);
-                d.classList.toggle('bg-white/40', j !== i);
-            });
-            document.querySelectorAll('[id^="thumb-"]').forEach((t, j) => {
-                t.classList.toggle('border-violet-500', j === i);
-                t.classList.toggle('border-transparent', j !== i);
-            });
-        }
-
-        async function toggleLikeDetail(photoId, btn) {
-            const res = await fetch(`/photos/${photoId}/like`, {
-                method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
-            const icon = btn.querySelector('span');
-            document.getElementById('detail-like-count').textContent = data.total;
-            if (data.liked) { icon.innerHTML = '&#10084;'; btn.classList.replace('text-gray-400', 'text-red-400'); }
-            else { icon.innerHTML = '&#9825;'; btn.classList.replace('text-red-400', 'text-gray-400'); }
-        }
-
-        async function submitDetailComment(photoId) {
-            const input = document.getElementById('detail-comment-input');
-            const body = input.value.trim();
-            if (!body) return;
-            const res = await fetch(`/photos/${photoId}/comment`, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ body })
-            });
-            const data = await res.json();
-            const list = document.getElementById('detail-comments');
-            const div = document.createElement('div');
-            div.className = 'flex gap-2 text-sm';
-            div.innerHTML = `
-            <div class="w-7 h-7 rounded-full bg-violet-800 flex-shrink-0 flex items-center justify-center text-xs font-bold">
-                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-            </div>
-            <div>
-                <span class="text-violet-400 font-medium text-xs">${data.comment.user_name}</span>
-                <span class="text-gray-300 text-xs ml-1">${data.comment.body}</span>
-            </div>
-        `;
-            list.appendChild(div);
-            const cnt = document.getElementById('detail-comment-count');
-            if (cnt) cnt.textContent = data.total;
-            input.value = '';
-            list.scrollTop = list.scrollHeight;
-        }
-
-        async function toggleFollow(userId, btn) {
-            const res = await fetch(`/users/${userId}/follow`, {
-                method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
-            if (data.is_following) {
-                btn.innerHTML = '&#10003; Mengikuti';
-                btn.className = btn.className.replace('bg-violet-600 hover:bg-violet-700 text-white', 'bg-gray-700 text-gray-300 hover:bg-red-900/30 hover:text-red-400');
-            } else {
-                btn.innerHTML = '&#43; Ikuti';
-                btn.className = btn.className.replace('bg-gray-700 text-gray-300 hover:bg-red-900/30 hover:text-red-400', 'bg-violet-600 hover:bg-violet-700 text-white');
-            }
-        }
-
-        function copyDetailLink() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                const btn = document.getElementById('copyBtnText');
-                btn.textContent = '&#10003; Disalin!';
-                setTimeout(() => btn.textContent = 'Salin Link', 2000);
-            });
-        }
-    </script>
-@endpush
+@endif

@@ -1,0 +1,86 @@
+.photo-detail-wrap {
+    @apply max-w-5xl mx-auto;
+}
+
+.photo-detail-grid {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-8 items-start;
+}
+
+.photo-main-img {
+    @apply rounded-2xl overflow-hidden border border-white/10 relative;
+}
+
+.thumbnail-strip {
+    @apply flex gap-2 mt-3 overflow-x-auto pb-2;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.thumbnail-strip::-webkit-scrollbar {
+    display: none;
+}
+
+.thumbnail-item {
+    @apply flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 border-transparent transition-all cursor-pointer;
+}
+
+.thumbnail-item.active {
+    @apply border-violet-500;
+}
+
+.photo-info-panel {
+    @apply flex flex-col h-full;
+}
+
+.uploader-row {
+    @apply flex items-center justify-between mb-5;
+}
+
+.uploader-avatar {
+    @apply w-10 h-10 rounded-full object-cover ring-2 ring-violet-500/30;
+}
+
+.photo-caption {
+    @apply text-2xl font-bold mb-2 leading-tight;
+}
+
+.photo-desc {
+    @apply text-gray-400 text-sm mb-4 leading-relaxed;
+}
+
+.photo-stats-row {
+    @apply flex items-center gap-6 py-4 border-y border-white/10 mb-4;
+}
+
+.stat-item-btn {
+    @apply flex items-center gap-2 text-sm transition-colors;
+}
+
+.photo-actions-row {
+    @apply flex gap-2 mb-5;
+}
+
+.photo-action-btn {
+    @apply flex-1 flex items-center justify-center gap-2 py-2.5 text-sm bg-white/8 hover:bg-white/15 border border-white/12 rounded-xl text-gray-300 transition-colors;
+}
+
+.comments-list {
+    @apply flex-1 overflow-y-auto max-h-60 space-y-3 mb-4 pr-1 scrollbar-thin scrollbar-thumb-gray-700;
+}
+
+.comment-detail-item {
+    @apply flex gap-3;
+}
+
+.comment-detail-avatar {
+    @apply w-7 h-7 rounded-full flex-shrink-0 object-cover;
+}
+
+.comment-detail-input-wrap {
+    @apply flex gap-2 mt-auto;
+}
+
+/* Photo detail as page with bg photo */
+.photo-page-layout {
+    @apply relative min-h-screen;
+}
