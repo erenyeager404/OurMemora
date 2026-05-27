@@ -2,27 +2,33 @@
 @section('title', 'OurMemora — Abadikan Setiap Momen')
 
 @section('content')
-    <section class="hero-section">
-        <div class="hero-blob"></div>
+
+    {{-- Hero --}}
+    <section class="pt-28 pb-16 px-6 text-center relative overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none"
+            style="background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 70%)">
+        </div>
         <div class="relative z-10">
-            <div class="hero-badge">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-violet-950/60 border border-violet-800/40 rounded-full text-xs text-violet-300">
                 <span class="w-2 h-2 bg-violet-400 rounded-full animate-pulse"></span>
                 Abadikan kenangan, bagikan cerita
             </div>
-            <h1 class="hero-title">
-                Setiap foto<br>
-                menyimpan <span class="text-violet-400">cerita</span>
+            <h1 class="text-5xl md:text-6xl font-bold mb-5 leading-[1.15] tracking-tight">
+                Setiap foto<br>menyimpan <span class="text-violet-400">cerita</span>
             </h1>
-            <p class="hero-sub">
+            <p class="text-gray-400 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
                 OurMemora hadir untuk mengabadikan momen berharga,<br>
                 menemukan karya indah, dan terhubung dengan orang-orang terdekat.
             </p>
             @guest
-                <div class="hero-cta">
-                    <button onclick="openModal('register')" class="btn-primary px-8 py-3 text-base">
+                <div class="flex items-center justify-center gap-4 flex-wrap">
+                    <button onclick="openModal('register')"
+                        class="px-8 py-3 text-base font-medium text-white bg-violet-600 hover:bg-violet-700 rounded-xl transition-colors">
                         Mulai Mengabadikan
                     </button>
-                    <button onclick="openModal('login')" class="btn-ghost px-8 py-3 text-base">
+                    <button onclick="openModal('login')"
+                        class="px-8 py-3 text-base text-gray-300 hover:text-white border border-white/10 hover:border-white/20 rounded-xl transition-colors">
                         Sudah punya akun
                     </button>
                 </div>
@@ -30,81 +36,89 @@
         </div>
     </section>
 
+    {{-- Gallery --}}
     <section class="max-w-7xl mx-auto px-6 pb-24">
-        @guest
-            <p class="text-center text-xs text-gray-600 mb-8">
-                ⬇ Download gratis tanpa login &nbsp;·&nbsp; Like, Simpan & Komentar perlu akun
-            </p>
-        @endguest
-
-        <div class="gallery-grid">
+        <div class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
             @forelse($photos as $photo)
                 @if($photo->files->isNotEmpty())
-                    <div class="card-landing">
+                    <div class="break-inside-avoid rounded-2xl overflow-hidden group bg-gray-900 border border-gray-800/50">
+
                         <a href="{{ route('photos.show', $photo) }}" class="block overflow-hidden">
                             <img src="{{ $photo->files->first()->url }}" alt="{{ $photo->caption }}"
                                 class="w-full object-cover transition-transform duration-500 group-hover:scale-105">
                         </a>
-                        <div class="photo-hover-overlay">
-                            <div>
-                                <p class="font-semibold text-sm">{{ $photo->caption }}</p>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <img src="{{ $photo->user->avatar_url }}" class="w-5 h-5 rounded-full">
-                                    <p class="text-gray-300 text-xs">{{ $photo->user->name }}</p>
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="p-3">
                             <p class="font-medium text-sm truncate mb-1">{{ $photo->caption }}</p>
                             <div class="flex items-center gap-2 mb-2">
-                                <img src="{{ $photo->user->avatar_url }}" class="w-4 h-4 rounded-full">
+                                <img src="{{ $photo->user->avatar_url }}" class="w-4 h-4 rounded-full object-cover">
                                 <p class="text-gray-500 text-xs">{{ $photo->user->name }}</p>
                             </div>
+
                             @if($photo->tags->isNotEmpty())
                                 <div class="flex flex-wrap gap-1 mb-2">
                                     @foreach($photo->tags->take(2) as $tag)
-                                        <span class="tag-chip">#{{ $tag->name }}</span>
+                                        <span class="px-2 py-0.5 bg-gray-800/80 text-gray-500 text-xs rounded-full">
+                                            #{{ $tag->name }}
+                                        </span>
                                     @endforeach
                                 </div>
                             @endif
-                            <div class="action-bar">
+
+                            <div class="flex items-center gap-3 pt-2.5 border-t border-gray-800/80">
                                 @auth
-                                    <button onclick="toggleLike({{ $photo->id }},this)"
-                                        class="btn-like {{ $photo->isLikedBy(auth()->id()) ? 'liked' : '' }}">
+                                    <button onclick="doLike({{ $photo->id }}, this)"
+                                        class="flex items-center gap-1.5 text-xs transition-colors {{ $photo->isLikedBy(auth()->id()) ? 'text-red-400' : 'text-gray-500 hover:text-red-400' }}">
                                         <span>{{ $photo->isLikedBy(auth()->id()) ? '♥' : '♡' }}</span>
-                                        <span class="like-count">{{ $photo->likes->count() }}</span>
+                                        <span class="lc">{{ $photo->likes->count() }}</span>
                                     </button>
-                                    <button onclick="toggleSave({{ $photo->id }},this)"
-                                        class="btn-save {{ $photo->isSavedBy(auth()->id()) ? 'saved' : '' }}">
+                                    <button onclick="doSave({{ $photo->id }}, this)"
+                                        class="flex items-center gap-1 text-xs transition-colors {{ $photo->isSavedBy(auth()->id()) ? 'text-violet-400' : 'text-gray-500 hover:text-violet-400' }}">
                                         <span>{{ $photo->isSavedBy(auth()->id()) ? '◈' : '◇' }}</span>
                                     </button>
-                                    <button onclick="toggleCmt({{ $photo->id }})" class="btn-comment">
+                                    <button onclick="doCmt({{ $photo->id }})"
+                                        class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-400 transition-colors">
                                         <span>◯</span>
-                                        <span class="comment-count">{{ $photo->comments->count() }}</span>
+                                        <span class="cc">{{ $photo->comments->count() }}</span>
                                     </button>
                                 @else
-                                    <button onclick="openModal('login','like')" class="btn-like"><span>♡</span>
-                                        {{ $photo->likes->count() }}</button>
-                                    <button onclick="openModal('login','save')" class="btn-save"><span>◇</span></button>
-                                    <button onclick="openModal('login','comment')" class="btn-comment"><span>◯</span>
-                                        {{ $photo->comments->count() }}</button>
+                                    <button onclick="openModal('login','like')"
+                                        class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 transition-colors">
+                                        <span>♡</span> {{ $photo->likes->count() }}
+                                    </button>
+                                    <button onclick="openModal('login','save')"
+                                        class="flex items-center gap-1 text-xs text-gray-500 hover:text-violet-400 transition-colors">
+                                        <span>◇</span>
+                                    </button>
+                                    <button onclick="openModal('login','comment')"
+                                        class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-400 transition-colors">
+                                        <span>◯</span> {{ $photo->comments->count() }}
+                                    </button>
                                 @endauth
-                                <a href="{{ route('photos.download', $photo) }}" class="ml-auto action-btn hover:text-green-400"
-                                    title="Download">⬇</a>
+
+                                <a href="{{ route('photos.download', $photo) }}"
+                                    class="ml-auto text-gray-500 hover:text-green-400 transition-colors text-sm" title="Download">
+                                    ⬇
+                                </a>
                             </div>
+
                             @auth
                                 <div id="cs-{{ $photo->id }}" class="hidden mt-3">
-                                    <div id="cl-{{ $photo->id }}" class="comment-list mb-2">
+                                    <div id="cl-{{ $photo->id }}" class="space-y-1.5 mb-2 max-h-28 overflow-y-auto">
                                         @foreach($photo->comments->take(3) as $c)
-                                            <div class="comment-item"><span class="comment-name">{{ $c->user->name }}</span><span
-                                                    class="text-gray-400 ml-1">{{ $c->body }}</span></div>
+                                            <div class="text-xs">
+                                                <span class="text-violet-300 font-medium">{{ $c->user->name }}</span>
+                                                <span class="text-gray-400 ml-1">{{ $c->body }}</span>
+                                            </div>
                                         @endforeach
                                     </div>
-                                    <div class="comment-wrap">
+                                    <div class="flex gap-2">
                                         <input type="text" id="ci-{{ $photo->id }}" placeholder="Tulis komentar..."
-                                            class="comment-input">
-                                        <button onclick="submitCmt({{ $photo->id }})"
-                                            class="btn-primary px-3 py-1.5 text-xs">Kirim</button>
+                                            class="flex-1 px-3 py-1.5 bg-gray-800 border border-gray-700 rounded-lg text-xs text-white placeholder-gray-600 focus:outline-none focus:border-violet-500">
+                                        <button onclick="sendCmt({{ $photo->id }})"
+                                            class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 rounded-lg text-xs text-white transition-colors">
+                                            Kirim
+                                        </button>
                                     </div>
                                 </div>
                             @endauth
@@ -120,31 +134,32 @@
         </div>
         <div class="mt-10">{{ $photos->links() }}</div>
     </section>
+
 @endsection
 
 @push('scripts')
     <script>
-        async function toggleLike(id, btn) {
+        async function doLike(id, btn) {
             const r = await fetch(`/photos/${id}/like`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' } });
             const d = await r.json();
             btn.querySelector('span').innerHTML = d.liked ? '♥' : '♡';
-            btn.querySelector('.like-count').textContent = d.total;
-            btn.classList.toggle('liked', d.liked);
+            btn.querySelector('.lc').textContent = d.total;
+            btn.className = btn.className.replace(/text-(gray-500|red-400)/g, '');
+            btn.classList.add(d.liked ? 'text-red-400' : 'text-gray-500');
         }
-        async function toggleSave(id, btn) {
+        async function doSave(id, btn) {
             const r = await fetch(`/photos/${id}/save`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' } });
             const d = await r.json();
             btn.querySelector('span').innerHTML = d.saved ? '◈' : '◇';
-            btn.classList.toggle('saved', d.saved);
         }
-        function toggleCmt(id) { document.getElementById(`cs-${id}`).classList.toggle('hidden'); }
-        async function submitCmt(id) {
+        function doCmt(id) { document.getElementById(`cs-${id}`).classList.toggle('hidden'); }
+        async function sendCmt(id) {
             const inp = document.getElementById(`ci-${id}`);
             const body = inp.value.trim(); if (!body) return;
             const r = await fetch(`/photos/${id}/comment`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' }, body: JSON.stringify({ body }) });
             const d = await r.json();
-            const el = document.createElement('div'); el.className = 'comment-item';
-            el.innerHTML = `<span class="comment-name">${d.comment.user_name}</span><span class="text-gray-400 ml-1">${d.comment.body}</span>`;
+            const el = document.createElement('div'); el.className = 'text-xs';
+            el.innerHTML = `<span class="text-violet-300 font-medium">${d.comment.user_name}</span><span class="text-gray-400 ml-1">${d.comment.body}</span>`;
             document.getElementById(`cl-${id}`).appendChild(el);
             inp.value = '';
         }
