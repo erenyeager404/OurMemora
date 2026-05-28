@@ -70,4 +70,33 @@ class Photo extends Model
             return false;
         return $this->saves()->where('user_id', $userId)->exists();
     }
+
+    // Ivents
+    public function eventParticipations()
+    {
+        return $this->hasMany(EventParticipation::class);
+    }
+
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'event_participations');
+    }
+
+    // Cek apakah foto ini masuk top N di suatu event
+    public function getEventRankAttribute(): ?int
+    {
+        $participation = $this->eventParticipations()->first();
+        if (!$participation)
+            return null;
+
+        $event = $participation->event;
+        if (!$event)
+            return null;
+
+        $rank = $event->photos()
+            ->get()
+            ->search(fn($p) => $p->id === $this->id);
+
+        return $rank !== false ? $rank + 1 : null;
+    }
 }

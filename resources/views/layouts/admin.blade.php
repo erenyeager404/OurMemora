@@ -102,12 +102,14 @@
                 $nav = [
                     ['route' => 'admin.dashboard', 'icon' => '⊞', 'label' => 'Dashboard'],
                     ['route' => 'admin.engagement', 'icon' => '⎇', 'label' => 'Engagement'],
+                    ['route' => 'admin.events.index', 'icon' => '◎', 'label' => 'Events'],
+                    // ↑ Tambah ini
                     ['route' => 'profile', 'icon' => '◉', 'label' => 'Profile'],
                 ];
             @endphp
             @foreach($nav as $item)
                     <a href="{{ route($item['route']) }}" data-tip="{{ $item['label'] }}" class="nav-item flex items-center h-11 mx-2 px-3 rounded-xl transition-all cursor-pointer
-                              {{ request()->routeIs($item['route'])
+                                      {{ request()->routeIs($item['route'])
                 ? 'bg-red-600/80 text-white'
                 : 'text-gray-400 hover:text-white hover:bg-gray-800' }}">
                         <span
@@ -136,7 +138,8 @@
     <main class="main-content flex-1 min-h-screen p-8 relative z-10">
         @if(session('success'))
             <div class="mb-6 p-4 bg-green-900/40 border border-green-700/50 text-green-300 rounded-xl text-sm">✓
-                {{ session('success') }}</div>
+                {{ session('success') }}
+            </div>
         @endif
         @yield('content')
     </main>

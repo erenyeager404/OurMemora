@@ -67,38 +67,131 @@
 
                             <div class="flex items-center gap-3 pt-2.5 border-t border-gray-800/80">
                                 @auth
+
+                                    <!-- LIKE -->
                                     <button onclick="doLike({{ $photo->id }}, this)"
                                         class="flex items-center gap-1.5 text-xs transition-colors {{ $photo->isLikedBy(auth()->id()) ? 'text-red-400' : 'text-gray-500 hover:text-red-400' }}">
-                                        <span>{{ $photo->isLikedBy(auth()->id()) ? '♥' : '♡' }}</span>
+
+                                        @if($photo->isLikedBy(auth()->id()))
+                                            <!-- Filled Heart -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                                                                2 5.42 4.42 3 7.5 3
+                                                                c1.74 0 3.41.81 4.5 2.09
+                                                                C13.09 3.81 14.76 3 16.5 3
+                                                                19.58 3 22 5.42 22 8.5
+                                                                c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                            </svg>
+                                        @else
+                                            <!-- Outline Heart -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-current fill-none"
+                                                viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12.1 21.35l-1.1-1.02C5.14 15.24 2 12.39 2 8.85
+                                                                    2 5.92 4.42 3.5 7.35 3.5
+                                                                    c1.74 0 3.41.81 4.5 2.09
+                                                                    1.09-1.28 2.76-2.09 4.5-2.09
+                                                                    2.93 0 5.35 2.42 5.35 5.35
+                                                                    0 3.54-3.14 6.39-8.9 11.48l-1.1 1.02z" />
+                                            </svg>
+                                        @endif
+
                                         <span class="lc">{{ $photo->likes->count() }}</span>
                                     </button>
+
+                                    <!-- SAVE -->
                                     <button onclick="doSave({{ $photo->id }}, this)"
                                         class="flex items-center gap-1 text-xs transition-colors {{ $photo->isSavedBy(auth()->id()) ? 'text-violet-400' : 'text-gray-500 hover:text-violet-400' }}">
-                                        <span>{{ $photo->isSavedBy(auth()->id()) ? '◈' : '◇' }}</span>
+
+                                        @if($photo->isSavedBy(auth()->id()))
+                                            <!-- Filled Bookmark -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                                                <path d="M6 2c-1.1 0-2 .9-2 2v18l8-4 8 4V4
+                                                                c0-1.1-.9-2-2-2H6z" />
+                                            </svg>
+                                        @else
+                                            <!-- Outline Bookmark -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-current fill-none"
+                                                viewBox="0 0 24 24" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z" />
+                                            </svg>
+                                        @endif
                                     </button>
+
+                                    <!-- COMMENT -->
                                     <button onclick="doCmt({{ $photo->id }})"
                                         class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-400 transition-colors">
-                                        <span>◯</span>
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-current fill-none"
+                                            viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5
+                                                            M21 12c0 4.418-4.03 8-9 8
+                                                            a9.863 9.863 0 01-4-.8L3 20l1.3-3.9
+                                                            A7.93 7.93 0 013 12
+                                                            c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+
                                         <span class="cc">{{ $photo->comments->count() }}</span>
                                     </button>
+
                                 @else
+
+                                    <!-- GUEST LIKE -->
                                     <button onclick="openModal('login','like')"
                                         class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 transition-colors">
-                                        <span>♡</span> {{ $photo->likes->count() }}
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-current fill-none"
+                                            viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12.1 21.35l-1.1-1.02C5.14 15.24 2 12.39 2 8.85
+                                                            2 5.92 4.42 3.5 7.35 3.5
+                                                            c1.74 0 3.41.81 4.5 2.09
+                                                            1.09-1.28 2.76-2.09 4.5-2.09
+                                                            2.93 0 5.35 2.42 5.35 5.35
+                                                            0 3.54-3.14 6.39-8.9 11.48l-1.1 1.02z" />
+                                        </svg>
+
+                                        <span>{{ $photo->likes->count() }}</span>
                                     </button>
+
+                                    <!-- GUEST SAVE -->
                                     <button onclick="openModal('login','save')"
                                         class="flex items-center gap-1 text-xs text-gray-500 hover:text-violet-400 transition-colors">
-                                        <span>◇</span>
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-current fill-none"
+                                            viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6 3h12a1 1 0 011 1v17l-7-4-7 4V4a1 1 0 011-1z" />
+                                        </svg>
                                     </button>
+
+                                    <!-- GUEST COMMENT -->
                                     <button onclick="openModal('login','comment')"
                                         class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-400 transition-colors">
-                                        <span>◯</span> {{ $photo->comments->count() }}
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 stroke-current fill-none"
+                                            viewBox="0 0 24 24" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5
+                                                            M21 12c0 4.418-4.03 8-9 8
+                                                            a9.863 9.863 0 01-4-.8L3 20l1.3-3.9
+                                                            A7.93 7.93 0 013 12
+                                                            c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+
+                                        <span>{{ $photo->comments->count() }}</span>
                                     </button>
+
                                 @endauth
 
+                                <!-- DOWNLOAD -->
                                 <a href="{{ route('photos.download', $photo) }}"
-                                    class="ml-auto text-gray-500 hover:text-green-400 transition-colors text-sm" title="Download">
-                                    ⬇
+                                    class="ml-auto text-gray-500 hover:text-green-400 transition-colors" title="Download">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-current fill-none"
+                                        viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l4-4m-4 4l-4-4
+                                                    M5 21h14" />
+                                    </svg>
+
                                 </a>
                             </div>
 
