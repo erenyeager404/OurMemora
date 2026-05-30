@@ -10,6 +10,8 @@ use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PhotoController extends Controller
 {
@@ -23,6 +25,11 @@ class PhotoController extends Controller
 
     public function dashboard()
     {
+        // Admin tidak boleh di user dashboard
+        if (auth()->user()->is_admin) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $photos = Photo::where('status', 'public')
             ->with([
                 'user',
@@ -31,11 +38,10 @@ class PhotoController extends Controller
                 'saves',
                 'comments',
                 'tags',
-                'eventParticipations.event'
+                'eventParticipation.event'
             ])
             ->latest()->paginate(16);
 
-        // Tidak ada bgPhoto lagi — background dari gradient premium
         return view('dashboard.index', compact('photos'));
     }
 
@@ -59,25 +65,18 @@ class PhotoController extends Controller
             'saves',
             'comments.user',
             'tags',
-            'events'
+            'eventParticipation.event'
         ]);
 
-        // Ambil semua foto dalam album jika ada
-        $albumPhotos = $photo->album_id
-            ? Photo::where('album_id', $photo->album_id)
-                ->with('files')->orderBy('id')->get()
-            : collect([$photo]);
-
-        return view('photos.show', compact('photo', 'albumPhotos'));
+        return view('photos.show', compact('photo'));
     }
 
     public function showUpload()
     {
-        // Ambil event yang sedang aktif untuk dropdown
-        $activeEvents = Event::where('status', 'active')
+        $activeEvents = Event::whereIn('status', ['active'])
             ->where('end_date', '>', now())
+            ->orderBy('end_date')
             ->get();
-
         return view('photos.upload', compact('activeEvents'));
     }
 
@@ -85,7 +84,7 @@ class PhotoController extends Controller
     {
         $request->validate([
             'photos' => 'required|array|min:1|max:10',
-            'photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:10240',
+            'photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:20480',
             'caption' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'status' => 'required|in:public,private',
@@ -93,17 +92,25 @@ class PhotoController extends Controller
             'event_id' => 'nullable|exists:events,id',
         ]);
 
+        // Validasi event
+        $event = null;
+        if ($request->event_id) {
+            $event = Event::find($request->event_id);
+            if (!$event || !$event->canSubmit()) {
+                return back()->withErrors(['event_id' => 'Event tidak tersedia.']);
+            }
+            if ($event->hasUserJoined(auth()->id())) {
+                return back()->withErrors(['event_id' => 'Kamu sudah ikut event ini.']);
+            }
+        }
+
         $files = $request->file('photos');
         $albumId = count($files) > 1 ? Str::uuid()->toString() : null;
 
+        // Gabungkan tags + auto_tag event
         $tagInput = $request->tags ?? '';
-
-        // Jika ikut event, tambahkan auto_tag event
-        if ($request->event_id) {
-            $event = Event::find($request->event_id);
-            if ($event && $event->auto_tag) {
-                $tagInput = trim($tagInput . ',' . $event->auto_tag . ',EventMemora', ',');
-            }
+        if ($event?->auto_tag) {
+            $tagInput = trim($tagInput . ',' . $event->auto_tag . ',EventMemora', ',');
         }
 
         $photo = Photo::create([
@@ -115,14 +122,31 @@ class PhotoController extends Controller
         ]);
 
         foreach ($files as $i => $file) {
+            $uuid = Str::uuid()->toString();
+            $manager = new ImageManager(new Driver());
+
+            // Simpan versi original (max 1920px)
+            $origImg = $manager->read($file->getPathname())
+                ->scaleDown(width: 1920, height: 1920)
+                ->toWebp(88);
+            $origPath = "photos/orig/{$uuid}.webp";
+            Storage::disk('public')->put($origPath, $origImg);
+
+            // Simpan versi thumbnail (max 800px, untuk dashboard)
+            $thumbImg = $manager->read($file->getPathname())
+                ->scaleDown(width: 800, height: 800)
+                ->toWebp(72);
+            $thumbPath = "photos/thumb/{$uuid}.webp";
+            Storage::disk('public')->put($thumbPath, $thumbImg);
+
             PhotoFile::create([
                 'photo_id' => $photo->id,
-                'file_path' => $file->store('photos', 'public'),
+                'file_path' => $origPath,
+                'thumb_path' => $thumbPath,
                 'order' => $i,
             ]);
         }
-
-        // Process tags
+        // Tags
         if ($tagInput) {
             $tagIds = collect(
                 array_unique(array_filter(array_map('trim', explode(',', strtolower($tagInput)))))
@@ -131,9 +155,9 @@ class PhotoController extends Controller
         }
 
         // Daftarkan ke event
-        if ($request->event_id) {
+        if ($event) {
             EventParticipation::create([
-                'event_id' => $request->event_id,
+                'event_id' => $event->id,
                 'photo_id' => $photo->id,
                 'user_id' => auth()->id(),
             ]);
@@ -153,7 +177,7 @@ class PhotoController extends Controller
         if (!$file)
             abort(404);
         $path = Storage::disk('public')->path($file->file_path);
-        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        $ext = 'webp';
         return response()->download($path, Str::slug($photo->caption) . '.' . $ext);
     }
 
@@ -163,9 +187,10 @@ class PhotoController extends Controller
             abort(403);
         foreach ($photo->files as $f) {
             Storage::disk('public')->delete($f->file_path);
+            if ($f->thumb_path)
+                Storage::disk('public')->delete($f->thumb_path);
         }
         $photo->delete();
-        return redirect()->route('dashboard')
-            ->with('success', 'Foto berhasil dihapus.');
+        return redirect()->route('dashboard')->with('success', 'Foto berhasil dihapus.');
     }
 }

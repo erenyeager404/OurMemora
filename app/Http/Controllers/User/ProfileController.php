@@ -41,9 +41,7 @@ class ProfileController extends Controller
         }
 
         auth()->user()->update(['password' => Hash::make($request->password)]);
-
-        return redirect()->route('profile')
-            ->with('success', 'Password berhasil diubah!');
+        return redirect()->route('profile')->with('success', 'Password berhasil diubah!');
     }
 
     public function updateAvatar(Request $request)

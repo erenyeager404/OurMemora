@@ -99,4 +99,8 @@ class Photo extends Model
 
         return $rank !== false ? $rank + 1 : null;
     }
+    public function eventParticipation()
+    {
+        return $this->hasOne(EventParticipation::class);
+    }
 }

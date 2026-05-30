@@ -10,8 +10,7 @@ class EventController extends Controller
 {
     public function index()
     {
-        $events = Event::withCount('participations')
-            ->latest()->paginate(15);
+        $events = Event::withCount('participations')->latest()->paginate(15);
         return view('admin.events.index', compact('events'));
     }
 
@@ -25,13 +24,14 @@ class EventController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'prize_description' => 'nullable|string',
             'poster' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'max_winners' => 'required|integer|min:1|max:100',
             'rules' => 'nullable|string',
             'auto_tag' => 'nullable|string|max:50',
-            'status' => 'required|in:draft,active,ended',
+            'status' => 'required|in:draft,active,voting,ended',
         ]);
 
         $posterPath = null;
@@ -39,7 +39,6 @@ class EventController extends Controller
             $posterPath = $request->file('poster')->store('events', 'public');
         }
 
-        // Bersihkan auto_tag: hapus # dan spasi, lowercase
         $autoTag = $request->auto_tag
             ? strtolower(str_replace(['#', ' '], ['', ''], $request->auto_tag))
             : null;
@@ -48,6 +47,7 @@ class EventController extends Controller
             'created_by' => auth()->id(),
             'title' => $request->title,
             'description' => $request->description,
+            'prize_description' => $request->prize_description,
             'poster_path' => $posterPath,
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
@@ -57,36 +57,73 @@ class EventController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect()->route('admin.events.index')
-            ->with('success', 'Event berhasil dibuat!');
+        return redirect()->route('admin.events.index')->with('success', 'Event berhasil dibuat!');
     }
 
     public function show(Event $event)
     {
-        $leaderboard = $event->photos()
-            ->with(['files', 'user'])
-            ->take(20)->get();
-
-        $totalParticipants = $event->participations()
-            ->distinct('user_id')->count();
-
+        $leaderboard = $event->getLeaderboard(50);
+        $totalParticipants = $event->participations()->distinct('user_id')->count();
         return view('admin.events.show', compact('event', 'leaderboard', 'totalParticipants'));
+    }
+
+    public function edit(Event $event)
+    {
+        return view('admin.events.edit', compact('event'));
+    }
+
+    public function update(Request $request, Event $event)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'prize_description' => 'nullable|string',
+            'poster' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'max_winners' => 'required|integer|min:1|max:100',
+            'rules' => 'nullable|string',
+            'auto_tag' => 'nullable|string|max:50',
+            'status' => 'required|in:draft,active,voting,ended',
+        ]);
+
+        if ($request->hasFile('poster')) {
+            if ($event->poster_path)
+                Storage::disk('public')->delete($event->poster_path);
+            $event->poster_path = $request->file('poster')->store('events', 'public');
+        }
+
+        $event->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'prize_description' => $request->prize_description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'max_winners' => $request->max_winners,
+            'rules' => $request->rules,
+            'auto_tag' => $request->auto_tag
+                ? strtolower(str_replace(['#', ' '], ['', ''], $request->auto_tag))
+                : null,
+            'status' => $request->status,
+            'poster_path' => $event->poster_path,
+        ]);
+
+        return redirect()->route('admin.events.show', $event)
+            ->with('success', 'Event berhasil diupdate!');
     }
 
     public function updateStatus(Request $request, Event $event)
     {
-        $request->validate(['status' => 'required|in:draft,active,ended']);
+        $request->validate(['status' => 'required|in:draft,active,voting,ended']);
         $event->update(['status' => $request->status]);
         return back()->with('success', 'Status event diperbarui.');
     }
 
     public function destroy(Event $event)
     {
-        if ($event->poster_path) {
+        if ($event->poster_path)
             Storage::disk('public')->delete($event->poster_path);
-        }
         $event->delete();
-        return redirect()->route('admin.events.index')
-            ->with('success', 'Event berhasil dihapus.');
+        return redirect()->route('admin.events.index')->with('success', 'Event dihapus.');
     }
 }

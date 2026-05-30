@@ -2,13 +2,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
-use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
     public function index()
     {
-        $activeEvents = Event::where('status', 'active')
+        $activeEvents = Event::whereIn('status', ['active', 'voting'])
             ->withCount('participations')
             ->orderBy('end_date')
             ->get();
@@ -19,21 +18,38 @@ class EventController extends Controller
             ->take(6)
             ->get();
 
-        return view('events.index', compact('activeEvents', 'endedEvents'));
+        $upcomingEvents = Event::where('status', 'active')
+            ->where('start_date', '>', now())
+            ->withCount('participations')
+            ->orderBy('start_date')
+            ->get();
+
+        return view('events.index', compact('activeEvents', 'endedEvents', 'upcomingEvents'));
     }
 
     public function show(Event $event)
     {
-        $leaderboard = $event->photos()
-            ->with(['files', 'user'])
-            ->take(20)
-            ->get();
-        // Top 20 foto berdasarkan jumlah like
+        // Draft hanya admin
+        if ($event->status === 'draft' && !auth()->user()?->is_admin) {
+            abort(404);
+        }
 
-        $totalParticipants = $event->participations()
-            ->distinct('user_id')
-            ->count();
+        $leaderboard = $event->getLeaderboard(20);
+        $totalParticipants = $event->participations()->distinct('user_id')->count();
+        $userHasJoined = auth()->check() ? $event->hasUserJoined(auth()->id()) : false;
+        $userPhoto = null;
 
-        return view('events.show', compact('event', 'leaderboard', 'totalParticipants'));
+        if ($userHasJoined) {
+            $p = $event->participations()->where('user_id', auth()->id())->first();
+            $userPhoto = $p?->photo?->load('files');
+        }
+
+        return view('events.show', compact(
+            'event',
+            'leaderboard',
+            'totalParticipants',
+            'userHasJoined',
+            'userPhoto'
+        ));
     }
 }
