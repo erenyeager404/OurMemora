@@ -144,105 +144,49 @@
         </div>
 
         {{-- Leaderboard --}}
-        @if($leaderboard->isNotEmpty())
-            <h2 class="text-xl font-bold mb-5">
-                🏆 Leaderboard
-                <span class="text-gray-500 text-base font-normal ml-2">Top {{ $leaderboard->count() }} berdasarkan like</span>
-            </h2>
+        <h3 class="font-semibold mb-4 text-gray-300">Leaderboard ({{ $leaderboard->count() }} foto)</h3>
+        <div class="space-y-2">
+            @forelse($leaderboard as $i => $photo)
+                @if($photo->files->isNotEmpty())
+                    <div class="flex items-center gap-4 p-4 rounded-2xl transition-all"
+                        style="background:{{ $i === 0 ? 'rgba(234,179,8,.07)' : ($i === 1 ? 'rgba(156,163,175,.04)' : 'rgba(255,255,255,.02)') }};border:1px solid {{ $i === 0 ? 'rgba(234,179,8,.2)' : 'rgba(255,255,255,.06)' }}">
 
-            {{-- Top 3 --}}
-            @if($leaderboard->count() >= 3)
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    @foreach($leaderboard->take(3) as $i => $photo)
-                        @if($photo->files->isNotEmpty())
-                            <a href="{{ route('photos.show', $photo) }}"
-                                class="rounded-2xl overflow-hidden group block transition-all {{ $i === 0 ? 'ring-2 ring-yellow-400/50' : '' }}"
-                                style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)">
-                                <div class="relative overflow-hidden" style="height:{{ $i === 0 ? '180px' : '144px' }}">
-                                    <img src="{{ $photo->files->first()->thumb_url }}" alt="{{ $photo->caption }}"
-                                        class="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-400">
-                                    <div class="absolute top-2 left-2">
-                                        <span class="px-2.5 py-1 text-[11px] font-bold rounded-full"
-                                            style="{{ $i === 0
-                                        ? 'background:rgba(234,179,8,.9);color:#000;box-shadow:0 0 10px rgba(234,179,8,.4)'
-                                        : ($i === 1 ? 'background:rgba(156,163,175,.8);color:#000' : 'background:rgba(180,83,9,.85);color:#fff') }}">
-                                            {{ $i === 0 ? '👑 #1' : ($i === 1 ? '🥈 #2' : '🥉 #3') }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="p-3">
-                                    <p class="text-[13px] font-medium truncate">{{ $photo->caption }}</p>
-                                    <div class="flex items-center justify-between mt-1">
-                                        <span class="text-gray-500 text-xs truncate">{{ $photo->user->name }}</span>
-                                        <span class="text-red-400 text-xs font-medium flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                            </svg>
-                                            {{ $photo->likes_count }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                        @endif
-                    @endforeach
-                </div>
-            @endif
-
-            {{-- Slider horizontal sisa --}}
-            @if($leaderboard->count() > 3)
-                <div class="overflow-x-auto pb-3">
-                    <div class="flex gap-3" style="min-width:max-content">
-                        @foreach($leaderboard as $i => $photo)
-                            @if($i >= 3 && $photo->files->isNotEmpty())
-                                <a href="{{ route('photos.show', $photo) }}"
-                                    class="flex-shrink-0 w-44 rounded-xl overflow-hidden group block transition-all"
-                                    style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)">
-                                    <div class="relative h-32 overflow-hidden">
-                                        <img src="{{ $photo->files->first()->thumb_url }}" alt="{{ $photo->caption }}"
-                                            class="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300">
-                                        <div class="absolute top-2 left-2">
-                                            <span class="px-2 py-0.5 text-[10px] font-medium rounded-full text-white"
-                                                style="background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15)">
-                                                #{{ $i + 1 }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="p-3">
-                                        <p class="text-xs font-medium truncate">{{ $photo->caption }}</p>
-                                        <div class="flex items-center justify-between mt-1">
-                                            <span class="text-gray-600 text-[11px] truncate">{{ $photo->user->name }}</span>
-                                            <span class="text-red-400 text-[11px] flex items-center gap-0.5">
-                                                <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                </svg>
-                                                {{ $photo->likes_count }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </a>
+                        <div class="w-8 text-center flex-shrink-0">
+                            @if($i === 0) <span class="text-lg">👑</span>
+                            @elseif($i === 1) <span class="text-lg">🥈</span>
+                            @elseif($i === 2) <span class="text-lg">🥉</span>
+                            @else <span class="text-sm text-gray-500 font-medium">#{{ $i + 1 }}</span>
                             @endif
-                        @endforeach
+                        </div>
+
+                        <img src="{{ $photo->files->first()->thumb_url }}" class="w-14 h-14 rounded-xl object-cover flex-shrink-0">
+
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-sm truncate">{{ $photo->caption }}</p>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <img src="{{ $photo->user->avatar_url }}" class="w-4 h-4 rounded-full">
+                                <span class="text-gray-500 text-xs">{{ $photo->user->name }}</span>
+                            </div>
+                        </div>
+
+                        <span class="text-red-400 font-bold text-sm flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            {{ $photo->likes_count }}
+                        </span>
+
+                        <a href="{{ route('photos.show', $photo) }}"
+                            class="flex items-center px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:text-white transition-all"
+                            style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1)">
+                            Lihat
+                        </a>
                     </div>
-                </div>
-            @endif
-        @else
-            <div class="text-center py-14 text-gray-600 rounded-2xl"
-                style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06)">
-                <svg class="w-14 h-14 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p class="text-gray-500 text-lg">Belum ada foto di event ini</p>
-                @if($event->canSubmit())
-                    <a href="{{ route('upload') }}"
-                        class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl text-sm text-white transition-all"
-                        style="background:rgba(124,58,237,.4);border:1px solid rgba(124,58,237,.5)">
-                        Jadilah yang pertama!
-                    </a>
                 @endif
-            </div>
-        @endif
+            @empty
+                <p class="text-center text-gray-600 py-10">Belum ada foto</p>
+            @endforelse
+        </div>
     </div>
 @endsection

@@ -37,8 +37,7 @@
         <label class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
             Hadiah <span class="normal-case font-normal text-gray-600">(opsional)</span>
         </label>
-        <textarea name="prize_description" rows="2"
-            placeholder="Contoh: Sertifikat + featured di homepage selama 1 minggu"
+        <textarea name="prize_description" rows="2" placeholder="Contoh: Sertifikat Uang Tunai"
             class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none resize-none"
             style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">{{ old('prize_description', $e?->prize_description) }}</textarea>
     </div>
