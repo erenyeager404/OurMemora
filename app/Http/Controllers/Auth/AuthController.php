@@ -106,7 +106,7 @@ class AuthController extends Controller
                 ]
             );
 
-            // Otomatis verifikasi email user Google
+
             if (!$user->hasVerifiedEmail()) {
                 $user->markEmailAsVerified();
             }
