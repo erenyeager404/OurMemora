@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -18,11 +20,12 @@ class AuthController extends Controller
             'password' => 'required|min:6|confirmed',
         ]);
 
+        // Hapus akun yang belum terverifikasi dengan email yang sama
         $existing = User::where('email', $request->email)->first();
         if ($existing) {
             if ($existing->hasVerifiedEmail()) {
                 return redirect()->route('landing')
-                    ->withErrors(['email' => 'Email sudah terdaftar. Silahkan login.'])
+                    ->withErrors(['email' => 'Email sudah terdaftar.'])
                     ->withInput($request->only('name', 'email'));
             }
             $existing->delete();
@@ -64,7 +67,7 @@ class AuthController extends Controller
 
         if (!auth()->user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice')
-                ->with('warning', 'Email belum diverifikasi. Cek inbox kamu.');
+                ->with('warning', 'Email belum diverifikasi.');
         }
 
         auth()->user()->update(['last_login_at' => now()]);
@@ -88,40 +91,44 @@ class AuthController extends Controller
     {
         return Socialite::driver('google')->redirect();
     }
-
-    public function handleGoogleCallback()
+    public function handleGoogleCallback(Request $request)
     {
         try {
-            $g = Socialite::driver('google')->user();
+            $googleUser = Socialite::driver('google')->user();
+
+            $user = User::updateOrCreate(
+                [
+                    'email' => $googleUser->getEmail(),
+                ],
+                [
+                    'name' => $googleUser->getName(),
+                    'google_id' => $googleUser->getId(),
+                ]
+            );
+
+            // Otomatis verifikasi email user Google
+            if (!$user->hasVerifiedEmail()) {
+                $user->markEmailAsVerified();
+            }
+
+            $user->update([
+                'last_login_at' => now(),
+            ]);
+
+            Auth::login($user, true);
+            $request->session()->regenerate();
+
+            return redirect()->route(
+                $user->is_admin
+                ? 'admin.dashboard'
+                : 'dashboard'
+            );
+
         } catch (\Exception $e) {
             return redirect()->route('landing')
-                ->withErrors(['email' => 'Login Google gagal.']);
+                ->withErrors([
+                    'email' => 'Login Google gagal: ' . $e->getMessage()
+                ]);
         }
-
-        $user = User::where('google_id', $g->getId())
-            ->orWhere('email', $g->getEmail())
-            ->first();
-
-        if ($user) {
-            $user->update([
-                'google_id' => $g->getId(),
-                'email_verified_at' => $user->email_verified_at ?? now(),
-            ]);
-        } else {
-            $user = User::create([
-                'name' => $g->getName(),
-                'email' => $g->getEmail(),
-                'google_id' => $g->getId(),
-                'password' => null,
-                'email_verified_at' => now(),
-            ]);
-        }
-
-        Auth::login($user);
-        $user->update(['last_login_at' => now()]);
-
-        return redirect()->intended(
-            $user->is_admin ? route('admin.dashboard') : route('dashboard')
-        );
     }
 }

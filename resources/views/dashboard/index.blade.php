@@ -51,7 +51,7 @@
     <div>
         <div class="flex items-center justify-between mb-7">
             <div>
-                <h2 class="text-2xl font-bold">Semua Foto</h2>
+                <h2 class="text-2xl font-bold">Semua Foto </h2>
                 <p class="text-gray-500 text-sm mt-0.5">Foto-foto terbaru dari komunitas</p>
             </div>
             <a href="{{ route('upload') }}"

@@ -4,12 +4,11 @@
     <div class="w-full max-w-sm mx-4 rounded-2xl overflow-hidden shadow-2xl"
         style="background:#0f111a;border:1px solid rgba(255,255,255,.1)">
 
-        {{-- Header --}}
         <div class="px-6 pt-6 pb-0">
             <div class="flex items-center justify-between mb-5">
-                <span class="font-bold text-[16px]">Our<span class="text-violet-400">Memora</span></span>
+                <span class="font-bold">Our<span class="text-violet-400">Memora</span></span>
                 <button onclick="closeModal()"
-                    class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors text-gray-500 hover:text-white"
+                    class="w-8 h-8 flex items-center justify-center rounded-xl text-gray-500 hover:text-white transition-colors"
                     style="background:rgba(255,255,255,.06)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -35,24 +34,24 @@
             </div>
         </div>
 
-        {{-- Login Form --}}
+        {{-- Login --}}
         <div id="fLogin" class="px-6 pb-6">
             <form method="POST" action="{{ route('login') }}" class="space-y-3">
                 @csrf
                 <div>
                     <label
-                        class="block text-[11px] text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Email</label>
+                        class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Email</label>
                     <input type="email" name="email" value="{{ old('email') }}" placeholder="email@kamu.com"
-                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none transition-all"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none"
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                     @error('email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label
-                        class="block text-[11px] text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Password</label>
+                        class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Password</label>
                     <div class="relative">
                         <input type="password" name="password" id="lPw" placeholder="••••••••"
-                            class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none transition-all pr-10"
+                            class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none pr-10"
                             style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                         <button type="button" onclick="togglePw('lPw')"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
@@ -64,11 +63,8 @@
                     </div>
                     @error('password') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
-                <div class="flex items-center gap-2 pb-1">
-                    <input type="checkbox" name="remember" id="rem" class="w-4 h-4 accent-violet-500">
-                    <label for="rem" class="text-xs text-gray-500">Ingat saya</label>
-                </div>
-                <button type="submit" class="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all"
+                <button type="submit"
+                    class="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90"
                     style="background:rgba(124,58,237,.5);border:1px solid rgba(124,58,237,.6)">
                     Masuk
                 </button>
@@ -81,7 +77,7 @@
             </div>
 
             <a href="{{ route('auth.google') }}"
-                class="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-xl text-sm text-gray-300 transition-all"
+                class="flex items-center justify-center gap-2.5 py-2.5 rounded-xl text-sm text-gray-300 transition-all hover:bg-white/10"
                 style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                 <svg width="16" height="16" viewBox="0 0 48 48">
                     <path fill="#EA4335"
@@ -95,43 +91,42 @@
                 </svg>
                 Lanjutkan dengan Google
             </a>
-
             <p class="text-center text-[12px] text-gray-600 mt-4">
                 Belum punya akun?
                 <button onclick="switchTab('register')" class="text-violet-400 hover:underline">Daftar</button>
             </p>
         </div>
 
-        {{-- Register Form --}}
+        {{-- Register --}}
         <div id="fReg" class="px-6 pb-6 hidden">
             <form method="POST" action="{{ route('register') }}" class="space-y-3">
                 @csrf
                 <div>
                     <label
-                        class="block text-[11px] text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Nama</label>
+                        class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Nama</label>
                     <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama kamu"
-                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none transition-all"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none"
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                     @error('name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label
-                        class="block text-[11px] text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Email</label>
+                        class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Email</label>
                     <input type="email" name="email" value="{{ old('email') }}" placeholder="email@kamu.com"
-                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none transition-all"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none"
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                     @error('email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label
-                        class="block text-[11px] text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Password</label>
+                        class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Password</label>
                     <div class="relative">
                         <input type="password" name="password" id="rPw" placeholder="Min. 6 karakter"
                             oninput="checkStrength(this.value)"
-                            class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none transition-all pr-10"
+                            class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none pr-10"
                             style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                         <button type="button" onclick="togglePw('rPw')"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -147,13 +142,15 @@
                     @error('password') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-[11px] text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Konfirmasi
+                    <label
+                        class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Konfirmasi
                         Password</label>
                     <input type="password" name="password_confirmation" placeholder="Ulangi password"
-                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none transition-all"
+                        class="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none"
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                 </div>
-                <button type="submit" class="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all"
+                <button type="submit"
+                    class="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90"
                     style="background:rgba(124,58,237,.5);border:1px solid rgba(124,58,237,.6)">
                     Daftar Sekarang
                 </button>

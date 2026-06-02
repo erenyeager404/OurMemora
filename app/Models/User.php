@@ -15,12 +15,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'is_admin',
         'google_id',
         'avatar',
+        'is_admin',
         'last_login_at',
+        'email_verified_at',
     ];
-
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
@@ -39,14 +39,17 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Photo::class);
     }
+
     public function likes()
     {
         return $this->hasMany(Like::class);
     }
+
     public function saves()
     {
         return $this->hasMany(Save::class);
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
@@ -54,27 +57,26 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function followers()
     {
-        return $this->hasMany(Follow::class, 'following_id');
+        return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id');
     }
 
     public function following()
     {
-        return $this->hasMany(Follow::class, 'follower_id');
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id');
     }
 
-    // Helpers
     public function isFollowing(int $userId): bool
     {
         return $this->following()->where('following_id', $userId)->exists();
     }
 
+    // Avatar accessor
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {
             return asset('storage/' . $this->avatar);
         }
-        return 'https://ui-avatars.com/api/?name='
-            . urlencode($this->name)
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name)
             . '&background=7C3AED&color=fff&size=128&bold=true';
     }
 }
