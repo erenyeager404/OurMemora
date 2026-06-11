@@ -1,6 +1,6 @@
-# MyGallery
+# OurMemora
 
-Panduan ini menjelaskan cara setup ulang proyek MyGallery di komputer lain.
+Set Up And Instalation
 
 ## Prasyarat
 
@@ -47,19 +47,47 @@ atau jika pakai yarn:
 yarn install
 ```
 
+> Jika repo ini belum memiliki Socialite, jalankan:
+>
+> ```bash
+> composer require laravel/socialite
+> ```
+
 ## Konfigurasi Environment
 
-Buka file `.env` dan sesuaikan:
+Edit file `.env` dan sesuaikan nilai berikut:
 
-- `APP_NAME=MyGallery`
-- `APP_URL=http://localhost`
-- `DB_CONNECTION=mysql`
-- `DB_HOST=127.0.0.1`
-- `DB_PORT=3306`
-- `DB_DATABASE=nama_database_anda`
-- `DB_USERNAME=user_database`
-- `DB_PASSWORD=password_database`
+```dotenv
+APP_NAME=MyGallery
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
 
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nama_database_anda
+DB_USERNAME=root
+DB_PASSWORD=
+
+FILESYSTEM_DISK=public
+
+MAIL_MAILER=log
+```
+
+Jika menggunakan Laragon dan custom domain, ubah `APP_URL` sesuai konfigurasi domain lokal.
+
+### Google Socialite
+
+Proyek ini sudah terkonfigurasi untuk login Google. Tambahkan variabel berikut di `.env`:
+
+```dotenv
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://127.0.0.1:8000/auth/google/callback
+```
+
+Pastikan URL callback ini sama dengan yang diatur di Google Cloud Console.
 
 ## Generate Application Key
 
@@ -69,23 +97,27 @@ php artisan key:generate
 
 ## Migrasi dan Seed Database
 
-Jalankan migrasi database:
+Buat database kosong di MySQL/MariaDB, lalu jalankan:
 
 ```bash
 php artisan migrate
 ```
 
-Jika ingin mengisi data awal (seed):
+Jika ingin mengisi data awal:
 
 ```bash
 php artisan db:seed
 ```
 
-> Jika menggunakan database kosong, pastikan database sudah dibuat terlebih dahulu melalui phpMyAdmin atau command line.
+Untuk memulai ulang database dan seed sekaligus:
+
+```bash
+php artisan migrate:fresh --seed
+```
 
 ## Storage Link
 
-Buat symbolic link agar file foto bisa diakses dari `public/storage`:
+Agar foto bisa diakses lewat browser, jalankan:
 
 ```bash
 php artisan storage:link
@@ -93,13 +125,13 @@ php artisan storage:link
 
 ## Build Aset Frontend
 
-Untuk mengompilasi file CSS/JS:
+Untuk build produksi:
 
 ```bash
 npm run build
 ```
 
-Untuk mode development dengan hot reload (opsional):
+Untuk mode development dengan hot reload:
 
 ```bash
 npm run dev
@@ -111,25 +143,35 @@ npm run dev
 php artisan serve
 ```
 
-Lalu buka di browser:
+Buka browser di:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## Hal yang Perlu Dicek Jika Error
+## Menampilkan Foto di Website
 
-- Pastikan file `.env` sudah benar
-- Pastikan database berhasil terhubung
-- Pastikan folder `storage` dan `bootstrap/cache` memiliki izin tulis
-- Jalankan ulang `composer install` jika ada dependensi hilang
+- Landing page utama menampilkan foto publik sebagai grid thumbnail.
+- Klik foto untuk melihat halaman detail foto.
+- Setelah login, buka dashboard untuk upload foto, melihat foto publik, memberi like, save, dan download.
+- Foto disimpan di `storage/app/public` dan diakses lewat `public/storage` setelah menjalankan `php artisan storage:link`.
 
-## Catatan
+## Login Google
 
-- Gunakan versi PHP yang sesuai dengan pengaturan `composer.json`
-- Jika menggunakan Laragon, pastikan `Document Root` diarahkan ke folder `MyGallery/public`
-- Jika ada masalah upload foto, periksa konfigurasi `FILESYSTEM_DRIVER` di `.env`
+Route Google login yang tersedia:
+
+- `/auth/google`
+- `/auth/google/callback`
+
+Tombol "Lanjutkan dengan Google" pada login modal akan menggunakan route di atas.
+
+## Troubleshooting
+
+- Pastikan file `.env` sudah terisi dengan benar.
+- Pastikan database sudah dibuat dan terhubung.
+- Pastikan `php artisan storage:link` sudah dijalankan.
+- Pastikan folder `storage` dan `bootstrap/cache` dapat ditulisi.
+- Jika asset tidak muncul, jalankan ulang `npm run dev` atau `npm run build`.
+- Jika login Google gagal, cek kembali setelan `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, dan `GOOGLE_REDIRECT_URI`.
 
 ---
-
-Jika butuh bantuan lebih lanjut, tambahkan dokumentasi atau langkah instalasi khusus sesuai konfigurasi server yang digunakan.
